@@ -10,7 +10,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 import os
 
-# === Constantes ===
+# Constantes 
 CONVERSION_RATE = 0.5  # roupie -> MAD
 CURRENT_YEAR = 2025
 OUTPUT_DIR = "visualizations"
@@ -20,7 +20,7 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 os.makedirs(MODEL_DIR, exist_ok=True)
 
 
-# === Fonctions principales ===
+# Fonctions principales
 
 def load_data(filepath: str) -> pd.DataFrame:
     """Charger et nettoyer les données"""
@@ -92,7 +92,48 @@ def evaluate_model(model, X_train, X_test, y_train, y_test):
     print(f"  📉 RMSE (test): {results['test']['RMSE']:.2f}")
     print(f"  📏 MAE (test) : {results['test']['MAE']:.2f}")
 
-    return results
+    # Analyse overfitting
+    r2_diff = results['train']['R2'] - results['test']['R2']
+    if r2_diff < 0.05:
+        print(f"  ✅ Pas d'overfitting (Δ R² = {r2_diff:.3f})")
+    elif r2_diff < 0.15:
+        print(f"  ⚠️  Léger overfitting (Δ R² = {r2_diff:.3f})")
+    else:
+        print(f"  ❌ Overfitting détecté (Δ R² = {r2_diff:.3f})")
+
+    return results, preds_train, preds_test
+
+
+def plot_overfitting_analysis(y_train, preds_train, y_test, preds_test, results):
+    """Visualiser train vs test pour détecter l'overfitting"""
+    print("\n📈 Génération du graphique d'analyse overfitting...")
+    
+    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+    
+    # Graphique 1 : Prédictions vs Réel (Train)
+    axes[0].scatter(y_train, preds_train, alpha=0.5, s=10, color='green')
+    axes[0].plot([y_train.min(), y_train.max()], [y_train.min(), y_train.max()], 
+                 'r--', lw=2, label='Ligne parfaite')
+    axes[0].set_xlabel('Prix Réel (MAD)')
+    axes[0].set_ylabel('Prix Prédit (MAD)')
+    axes[0].set_title(f"Train Set\nR² = {results['train']['R2']:.3f}")
+    axes[0].legend()
+    axes[0].grid(alpha=0.3)
+    
+    # Graphique 2 : Prédictions vs Réel (Test)
+    axes[1].scatter(y_test, preds_test, alpha=0.5, s=10, color='blue')
+    axes[1].plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 
+                 'r--', lw=2, label='Ligne parfaite')
+    axes[1].set_xlabel('Prix Réel (MAD)')
+    axes[1].set_ylabel('Prix Prédit (MAD)')
+    axes[1].set_title(f"Test Set\nR² = {results['test']['R2']:.3f}")
+    axes[1].legend()
+    axes[1].grid(alpha=0.3)
+    
+    plt.tight_layout()
+    plt.savefig(f"{OUTPUT_DIR}/overfitting_analysis.png", dpi=150)
+    plt.show()
+    print(f"✅ Graphique sauvegardé : {OUTPUT_DIR}/overfitting_analysis.png")
 
 
 def plot_feature_importance(model, num_cols, cat_cols):
@@ -118,7 +159,7 @@ def plot_feature_importance(model, num_cols, cat_cols):
     plt.tight_layout()
     plt.savefig(f"{OUTPUT_DIR}/feature_importance.png", dpi=150)
     plt.show()
-    print(f"Graphique sauvegardé : {OUTPUT_DIR}/feature_importance.png")
+    print(f"✅ Graphique sauvegardé : {OUTPUT_DIR}/feature_importance.png")
 
 
 def main():
@@ -134,9 +175,8 @@ def main():
     df = create_features(df)
 
     # Séparation features / target
-    #X = df.drop(columns=["selling_price", "name", "seats", "km_driven"], errors="ignore")
-    cols=['vehicle_age','year','max_power_bhp','torque_nm','engine_cc']
-    X=df[cols]
+    cols = ['vehicle_age', 'year', 'max_power_bhp', 'torque_nm', 'engine_cc']
+    X = df[cols]
     y = df["selling_price"]
 
     num_cols = X.select_dtypes(include=["int64", "float64"]).columns.tolist()
@@ -152,9 +192,10 @@ def main():
     model.fit(X_train, y_train)
 
     # Évaluation
-    results = evaluate_model(model, X_train, X_test, y_train, y_test)
+    results, preds_train, preds_test = evaluate_model(model, X_train, X_test, y_train, y_test)
 
-    # Visualisation des features importantes
+    # Visualisations
+    plot_overfitting_analysis(y_train, preds_train, y_test, preds_test, results)
     plot_feature_importance(model, num_cols, cat_cols)
 
     # Sauvegarde
