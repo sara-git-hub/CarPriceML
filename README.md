@@ -59,8 +59,8 @@ docker-compose ps
 
 ### Accès aux Services
 
-| Service | URL | Credentials |
-|---------|-----|-------------|
+| Service | URL |
+|---------|-----|
 | 🎨 Frontend | http://localhost:8501 |
 | 🔌 API | http://localhost:8000 |
 | 📚 API Docs | http://localhost:8000/docs |
