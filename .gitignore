@@ -6,14 +6,12 @@ __pycache__/
 # Docker
 *.log
 
-# Modèles
-models/*.joblib
-
 # Données sensibles
 data/*.csv
 
 #Jupyter
 *.ipynb
- 
+
+#Fichier 
 info.txt
 train_v2.py
