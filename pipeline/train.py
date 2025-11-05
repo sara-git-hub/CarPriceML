@@ -40,7 +40,7 @@ def convert_prices(df: pd.DataFrame) -> pd.DataFrame:
 def remove_outliers(df: pd.DataFrame, cols=None) -> pd.DataFrame:
     """Supprimer les outliers via IQR"""
     print("\n🧹 Suppression des outliers...")
-    cols = cols or ["selling_price", "year", "max_power_bhp", "torque_nm"]
+    cols = cols
     for col in [c for c in cols if c in df.columns]:
         Q1, Q3 = df[col].quantile([0.25, 0.75])
         IQR = Q3 - Q1
@@ -171,7 +171,7 @@ def main():
     # Chargement et préparation
     df = load_data("../data/car-details.csv")
     df = convert_prices(df)
-    df = remove_outliers(df)
+    df = remove_outliers(df,["selling_price", "year", "max_power_bhp", "torque_nm"])
     df = create_features(df)
 
     # Séparation features / target
