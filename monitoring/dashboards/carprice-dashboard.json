@@ -1,0 +1,174 @@
+{
+  "dashboard": {
+    "title": "CarPrice ML - API Monitoring",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Total Predictions",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "predictions_total",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": null, "color": "green"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Cache Hit Rate",
+        "type": "gauge",
+        "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0},
+        "targets": [
+          {
+            "expr": "rate(cache_hits_total[5m]) / (rate(cache_hits_total[5m]) + rate(cache_misses_total[5m])) * 100",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 50, "color": "yellow"},
+                {"value": 80, "color": "green"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Prediction Duration (p95)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(prediction_duration_seconds_bucket[5m]))",
+            "refId": "A",
+            "legendFormat": "p95"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(prediction_duration_seconds_bucket[5m]))",
+            "refId": "B",
+            "legendFormat": "p50"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Predictions per Minute",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+        "targets": [
+          {
+            "expr": "rate(predictions_total[1m]) * 60",
+            "refId": "A",
+            "legendFormat": "Predictions/min"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Error Rate",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+        "targets": [
+          {
+            "expr": "rate(errors_total[5m])",
+            "refId": "A",
+            "legendFormat": "{{error_type}}"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "System Status",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 16},
+        "targets": [
+          {
+            "expr": "model_loaded",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {"value": 1, "text": "Model Loaded"},
+              {"value": 0, "text": "Model NOT Loaded"}
+            ],
+            "thresholds": {
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 1, "color": "green"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Redis Status",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 16},
+        "targets": [
+          {
+            "expr": "redis_connected",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {"value": 1, "text": "Redis Connected"},
+              {"value": 0, "text": "Redis Disconnected"}
+            ],
+            "thresholds": {
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 1, "color": "green"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 8,
+        "title": "Cache Hits vs Misses",
+        "type": "piechart",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+        "targets": [
+          {
+            "expr": "cache_hits_total",
+            "refId": "A",
+            "legendFormat": "Cache Hits"
+          },
+          {
+            "expr": "cache_misses_total",
+            "refId": "B",
+            "legendFormat": "Cache Misses"
+          }
+        ]
+      }
+    ],
+    "refresh": "5s",
+    "time": {"from": "now-1h", "to": "now"},
+    "timezone": "browser"
+  }
+}

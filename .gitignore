@@ -1,0 +1,18 @@
+# Environnement
+.env
+venv/
+__pycache__/
+
+# Docker
+*.log
+
+# Modèles
+models/*.joblib
+
+# Données sensibles
+data/*.csv
+
+#Jupyter
+.ipynb
+
+info.txt
