@@ -11,7 +11,7 @@ Système MLOps complet pour prédire le prix des voitures au Maroc avec ML, API 
 ## 🚀 Installation Rapide
 ```bash
 # 1. Cloner et préparer
-git clone <repo>
+git clone https://github.com/sara-git-hub/CarPriceML.git
 cd CarPriceML
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
